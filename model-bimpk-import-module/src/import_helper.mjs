@@ -624,6 +624,9 @@ const extractBimpk = async (param, IafScriptEngine, ctx) => {
 						// Get the dName from the respective property and assign it to the property
 						prop.dName = _myProp.dName;
 
+						// Get the type from the respective property and assign it to the property
+						prop.srcType = _myProp.type;
+
 						// Get the assetCategory from the respective property and assign it to the property
 						if (_myProp.assetCategory != undefined || _myProp.assetCategory != null) {
 							_type.baType = _myProp.assetCategory;
@@ -764,6 +767,9 @@ const extractBimpk = async (param, IafScriptEngine, ctx) => {
 
 						// Get the dName from the respective property and assign it to the property
 						prop.dName = _myProp.dName;
+
+						// Get the type from the respective property and assign it to the property
+						prop.srcType = _myProp.type;
 
 						if (_myProp.psDispName != undefined || _myProp.psDispName != null) {
 							prop.psDispName = _myProp.psDispName;
