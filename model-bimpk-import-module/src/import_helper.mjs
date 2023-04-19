@@ -144,13 +144,18 @@ const createRelatedItemsAndRelationships = async (_colls, IafScriptEngine, ctx) 
 	// Add items in the properties variable to the model_els_props_coll
 	// properties is _objectsArray.objects.properties
 	// Relate model_els_props_coll to the model_els_coll
-	await IafScriptEngine.createItemsAsRelatedBulk({
-		'parentUserItemId': _colls.model_els_coll._userItemId,
-		'_userItemId': _colls.model_els_props_coll._userItemId,
-		'_namespaces': ctx._namespaces,
-		'items': IafScriptEngine.getVar('properties')
-	}, ctx);
-	console.log('Create Related Collection properties');
+	let instanceProperties = IafScriptEngine.getVar('properties')
+	if (instanceProperties && instanceProperties.length) {
+		await IafScriptEngine.createItemsAsRelatedBulk({
+			'parentUserItemId': _colls.model_els_coll._userItemId,
+			'_userItemId': _colls.model_els_props_coll._userItemId,
+			'_namespaces': ctx._namespaces,
+			'items': IafScriptEngine.getVar('properties')
+		}, ctx);
+		console.log('Create Related Collection properties');
+	} else {
+		console.log('No instance properties to create');
+	}
 
 	// Create relations between Elements and Type Properties
 	// Add relationship between two related items in different collections
@@ -568,6 +573,7 @@ const createBIMCollectionVersion = async (param, PlatformApi, IafScriptEngine, c
 // Sets Variables: Creates variables and assigns data to be used later on
 const extractBimpk = async (param, IafScriptEngine, ctx) => {
 	try {
+
 		// As a part of the data cleansing process, we are creating a new object with 3 different arrays
 		// We will assign data to each array once we clean and modify data
 		const _objectsArray = {
@@ -722,6 +728,8 @@ const extractBimpk = async (param, IafScriptEngine, ctx) => {
 					const type = _objectsArray.types.find(type => type.id === elem.type);
 
 					if (type.properties) {
+
+						// bring forward useful Revit properties to the element if they exist
 						if (type.properties?.['Revit Family'] != undefined || type.properties?.['Revit Family'] != null) {
 							_myObj.revitFamily = type.properties['Revit Family'];
 						}
@@ -732,6 +740,21 @@ const extractBimpk = async (param, IafScriptEngine, ctx) => {
 
 						if (type.properties?.['Revit Category'] != undefined || type.properties?.['Revit Category'] != null) {
 							_myObj.revitCategory = type.properties['Revit Category'];
+						}
+
+						// bring forward useful AutoCAD properties to the element if they exist
+						if (type.properties?.['AutoCAD Class'] != undefined || type.properties?.['AutoCAD Class'] != null) {
+							_myObj['AutoCAD Class'] = type.properties['AutoCAD Class'];
+						}
+
+						// bring forward useful CIVIL 3D properties to the element if they exist
+						if (type.properties?.['Civil3D Class'] != undefined || type.properties?.['Civil3D Class'] != null) {
+							_myObj['Civil3D Class'] = type.properties['Civil3D Class'];
+						}
+
+						// bring forward useful IFC properties to the element if they exist
+						if (type.properties?.['IFCTypeObject'] != undefined || type.properties?.['IFCTypeObject'] != null) {
+							_myObj['IFCTypeObject'] = type.properties['IFCTypeObject'];
 						}
 					}
 
@@ -765,22 +788,24 @@ const extractBimpk = async (param, IafScriptEngine, ctx) => {
 					// 		},
 					// 		...
 					// 	]
-					for (const prop of elem.properties) {
-						// Find the respective property in the properties array
-						const _myProp = _objectsArray.properties.find(x => x.id == prop.id);
+					if (elem.properties) {
+						for (const prop of elem.properties) {
+							// Find the respective property in the properties array
+							const _myProp = _objectsArray.properties.find(x => x.id == prop.id);
 
-						// Get the dName from the respective property and assign it to the property
-						prop.dName = _myProp.dName;
+							// Get the dName from the respective property and assign it to the property
+							prop.dName = _myProp.dName;
 
-						// Get the type from the respective property and assign it to the property
-						prop.srcType = _myProp.type;
+							// Get the type from the respective property and assign it to the property
+							prop.srcType = _myProp.type;
 
-						if (_myProp.psDispName != undefined || _myProp.psDispName != null) {
-							prop.psDispName = _myProp.psDispName;
-						}
+							if (_myProp.psDispName != undefined || _myProp.psDispName != null) {
+								prop.psDispName = _myProp.psDispName;
+							}
 
-						if (prop.name === 'System.elementId') {
-							_myObj.systemElementId = prop;
+							if (prop.name === 'System.elementId') {
+								_myObj.systemElementId = prop;
+							}
 						}
 					}
 
@@ -803,7 +828,8 @@ const extractBimpk = async (param, IafScriptEngine, ctx) => {
 					});
 
 					// Group properties array by the dName
-					_myObj.properties = groupBy(elem.properties, 'dName');
+					if (elem.properties)
+						_myObj.properties = groupBy(elem.properties, 'dName');
 
 					////////////////////////////////////////
 					// _myObj object
@@ -837,10 +863,12 @@ const extractBimpk = async (param, IafScriptEngine, ctx) => {
 					////////////////////////////////////////
 
 					// Push _id and properties array to the array create above
-					_myProperties.push({
-						_id: _myObj._id,
-						properties: _myObj.properties
-					});
+					if (_myObj.properties) {
+						_myProperties.push({
+							_id: _myObj._id,
+							properties: _myObj.properties
+						});
+					}
 
 					// Push it to the object array we have created above
 					_objectsArray.objects.push(_myObj);
