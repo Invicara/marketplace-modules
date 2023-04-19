@@ -28,7 +28,7 @@
  * model bimpks to your project. Be sure to see the test folder for material you can use to ensure
  * your project is correctly setup for model bimpk import.
  * 
- * This module is currently optimized for bimpks produced using Revit, but can be easily
+ * This module can be easily
  * customized and enhanced for any source design system.
  * 
  * To use this script:

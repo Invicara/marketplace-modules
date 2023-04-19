@@ -42,7 +42,7 @@
  * For instance the createModelDataCache function can be enhanced to aggregate or sum any type of model data or statistics
  * it could expensive to compute on the fly. By having Twinit perform that expensive compute at import time you can
  * enhance the speed of a client by fetching the precomputed information. Or if there are other properties your
- * application would beneift from having directly on the element items then the extractBimpk function can be enhanced
+ * application would benefit from having directly on the element items then the extractBimpk function can be enhanced
  * to place those properties directly on the element at import time.
  * 
  * This script file a generic base script that can be enhanced and changes to meet your needs.
