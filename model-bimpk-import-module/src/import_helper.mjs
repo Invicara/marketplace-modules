@@ -339,6 +339,7 @@ const createBIMCollections = async (param, IafScriptEngine, ctx) => {
 
 	const bimpkFileId = await IafScriptEngine.getVar('bimpk_fileid');
 	const bimpkFileVersionId = await IafScriptEngine.getVar('bimpk_fileVersionId');
+	const bimpkSource = await IafScriptEngine.getVar('bimpk_source');
 
 	// Model Composite Item
 	const modelCompItem = {
@@ -352,7 +353,8 @@ const createBIMCollections = async (param, IafScriptEngine, ctx) => {
 				'bimpk': {
 					'fileId': bimpkFileId,
 					'fileVersionId': bimpkFileVersionId
-				}
+				},
+				'source': bimpkSource
 			}
 		}
 	}
@@ -394,12 +396,14 @@ const createBIMCollectionVersion = async (param, PlatformApi, IafScriptEngine, c
 	// Refetch file related information just in case they updated
 	const bimpkFileId = await IafScriptEngine.getVar('bimpk_fileid');
 	const bimpkFileVersionId = await IafScriptEngine.getVar('bimpk_fileVersionId');
+	const bimpkSource = await IafScriptEngine.getVar('bimpk_source');
 
 	newModelVer._userAttributes = {
 		bimpk: {
 			fileId: bimpkFileId,
-			fileVersionId: bimpkFileVersionId
-		}
+			fileVersionId: bimpkFileVersionId,
+		},
+		source: bimpkSource
 	}
 
 	// Update composite item with the new fileID and fileVersionId
@@ -925,6 +929,7 @@ export default {
 		await IafScriptEngine.setVar('package_name_short', param.filename.substring(0, 11));
 		await IafScriptEngine.setVar('bimpk_fileid', param._fileId);
 		await IafScriptEngine.setVar('bimpk_fileVersionId', param._fileVersionId);
+		await IafScriptEngine.setVar('bimpk_source', param.files[0].source);
 
 		// check to see if the model to be imported has a previous version imported
 		// we search for a Model NamedCompositeItem wiht the files fileId
